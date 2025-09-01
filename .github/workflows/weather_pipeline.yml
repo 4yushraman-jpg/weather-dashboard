@@ -8,10 +8,8 @@ on:
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
-
-    # ADD THIS PERMISSIONS BLOCK
     permissions:
-      contents: write # This gives the job permission to push to the repository
+      contents: write
 
     steps:
       - name: Check out repository
@@ -23,7 +21,8 @@ jobs:
           python-version: '3.11' 
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        # THIS IS THE LINE THAT IS CHANGED
+        run: pip install -r requirements-pipeline.txt
 
       - name: Run the data pipeline script
         run: python pipeline.py
@@ -35,7 +34,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add weather_data.db weather_data.csv
-          # Check if there are changes to commit
           if git diff --staged --quiet; then
             echo "No changes to commit. Data is up-to-date."
           else

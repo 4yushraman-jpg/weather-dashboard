@@ -3,4 +3,3 @@ requests
 pandas
 python-dotenv
 plotly
-sqlite3-binary
