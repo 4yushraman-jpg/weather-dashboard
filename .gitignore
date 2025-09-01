@@ -16,8 +16,6 @@ Thumbs.db
 
 *.log
 
-weather_data.db
-
 .env
 
 .vscode/
