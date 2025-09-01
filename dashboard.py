@@ -3,6 +3,7 @@ import pandas as pd
 import sqlite3
 import plotly.express as px
 from datetime import datetime
+import io
 
 # Set page configuration
 st.set_page_config(
@@ -56,6 +57,23 @@ st.markdown("""
         color: #7f8c8d;
         text-transform: capitalize;
     }
+    .download-button {
+        background-color: #3498db;
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
+    .download-button:hover {
+        background-color: #2980b9;
+    }
+    .dataset-table {
+        font-size: 0.9rem;
+        margin-top: 1rem;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -95,6 +113,10 @@ class WeatherDashboard:
             ordered=True
         )
         return latest_data.sort_values('city')
+    
+    def convert_df_to_csv(self, df):
+        """Convert DataFrame to CSV for download"""
+        return df.to_csv(index=False).encode('utf-8')
 
     def display_header(self):
         """Display the main header"""
@@ -215,6 +237,38 @@ class WeatherDashboard:
             </div>
         </div>
         """, unsafe_allow_html=True)
+    
+    def display_dataset_section(self):
+        """Display dataset and download options"""
+        st.markdown("---")
+        st.markdown('<div class="section-header">Weather Dataset</div>', unsafe_allow_html=True)
+        
+        # Show dataset info
+        st.markdown(f"""
+        <div style="margin-bottom: 1rem; font-size: 0.9rem; color: #7f8c8d;">
+            Dataset contains {len(self.df)} records from {self.df['timestamp_utc'].min().strftime('%Y-%m-%d')} to {self.df['timestamp_utc'].max().strftime('%Y-%m-%d')}
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Display the dataset with a subset of columns for better readability
+        display_cols = ['city', 'temperature_celsius', 'feels_like_celsius', 
+                       'humidity_percent', 'wind_speed_mps', 'weather_description', 
+                       'timestamp_utc']
+        
+        st.dataframe(
+            self.df[display_cols].sort_values('timestamp_utc', ascending=False),
+            use_container_width=True,
+            height=300
+        )
+        
+        # Download button
+        st.download_button(
+            label="Download Full Dataset as CSV",
+            data=self.convert_df_to_csv(self.df),
+            file_name=f"weather_data_full_{datetime.now().strftime('%Y%m%d_%H%M')}.csv",
+            mime="text/csv",
+            key="full-download"
+        )
 
     def run(self):
         """Run the dashboard"""
@@ -238,6 +292,9 @@ class WeatherDashboard:
             for idx, (_, row) in enumerate(latest_data.iterrows()):
                 with cols[idx % 3]:
                     self.display_city_card_simple(row)
+        
+        # Dataset section
+        self.display_dataset_section()
 
         # Last update
         if not self.df.empty:
