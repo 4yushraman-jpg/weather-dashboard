@@ -1,15 +1,18 @@
 name: Hourly Weather Data Pipeline
 
 on:
-  # Runs every hour
   schedule:
     - cron: '0 * * * *'
-  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
 jobs:
   run-pipeline:
     runs-on: ubuntu-latest
+
+    # ADD THIS PERMISSIONS BLOCK
+    permissions:
+      contents: write # This gives the job permission to push to the repository
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -17,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.11' # You can change this to match your environment
+          python-version: '3.11' 
 
       - name: Install dependencies
         run: pip install -r requirements.txt
